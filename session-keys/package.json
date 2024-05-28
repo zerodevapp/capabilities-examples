@@ -1,5 +1,5 @@
 {
-  "name": "create-account",
+  "name": "session-keys",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.40.0",
     "@zerodev/wallet": "^0.0.4",
     "next": "14.2.3",
     "react": "^18",
@@ -18,15 +17,13 @@
     "wagmi": "^2.9.7"
   },
   "devDependencies": {
+    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "encoding": "^0.1.13",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.3",
-    "pino-pretty": "^11.1.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3"
   }
 }

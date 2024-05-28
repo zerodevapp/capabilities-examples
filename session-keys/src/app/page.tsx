@@ -1,0 +1,64 @@
+"use client";
+import { useConnect, useAccount, useDisconnect, useConnectors } from "wagmi";
+import { useWriteContracts } from "wagmi/experimental";
+import Sessions from "./Sessions";
+import { tokenAddress, abi, paymasterUrl } from "./constants"
+
+export default function App() {
+  const connectors = useConnectors();
+  const { connect, isPending } = useConnect();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data, writeContracts, isPending: isUserOpPending } = useWriteContracts();
+
+  return (
+    <div className="flex justify-center items-center h-screen">
+      {!isConnected ? (
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          disabled={isPending}
+          onClick={() => {
+            connect({ connector: connectors[0] })
+          }}
+        >
+          {isPending ? 'Connecting...' : 'Connect'}
+        </button>
+      ) : (
+        <div className="flex flex-col justify-center items-center h-screen">
+          <p>{`Smart Account Address: ${address}`}</p>
+          <div className="flex flex-row justify-center items-center gap-4">  {/* Updated line */}
+            <button onClick={() => disconnect()} className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+              Disconnect
+            </button>
+            <button 
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg" 
+              disabled={isUserOpPending}
+              onClick={() => {
+                writeContracts({
+                  contracts: [
+                    {
+                      address: tokenAddress,
+                      abi: abi,
+                      functionName: "mint",
+                      args: [address, 1],
+                      value: BigInt(0),
+                    }
+                  ],
+                  capabilities: {
+                    paymasterService: {
+                      url: paymasterUrl
+                    }
+                  }
+                })
+              }}
+            >
+              {isUserOpPending ? 'Minting...' : 'Mint'}
+            </button>
+          </div>
+          {data && <p>{`UserOp Hash: ${data}`}</p>}
+          <Sessions />
+        </div>    
+      )}  
+    </div>
+  );
+}
