@@ -14,7 +14,7 @@ export default function App() {
 
   const tokenAddress = "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B";
   const abi = parseAbi(["function mint(address _to, uint256 amount) public"]);
-  const paymasterUrl = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+  const paymasterUrl = `https://rpc.zerodev.app/api/v3/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 
   useEffect(() => setHydration(true), [])
   
