@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@zerodev/wallet": "^0.0.7",
+    "@zerodev/wallet": "^0.0.10",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",

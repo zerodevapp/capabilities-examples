@@ -25,7 +25,6 @@ function SessionInfo({ sessionId }: { sessionId: `0x${string}` }) {
                   abi: abi,
                   functionName: "mint",
                   args: [address, 1],
-                  value: BigInt(0),
                 },
               ],
               capabilities: {

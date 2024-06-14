@@ -41,7 +41,6 @@ export default function App() {
                       abi: abi,
                       functionName: "mint",
                       args: [address, 1],
-                      value: BigInt(0),
                     }
                   ],
                   capabilities: {
