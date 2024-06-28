@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react"
 import { useAccount, useWalletClient } from "wagmi";
-import { walletActionsErc7715, type IssuePermissionsReturnType } from "viem/experimental";
+import { walletActionsErc7715, type GrantPermissionsReturnType } from "viem/experimental";
 import { useWriteContracts } from "wagmi/experimental"
 import { ParamCondition } from "@zerodev/permissions/policies"
 import { paymasterUrl, tokenAddress, abi } from "./constants"
@@ -47,7 +47,7 @@ function SessionInfo({ sessionId }: { sessionId: `0x${string}` }) {
 }
 
 export default function SessionBlock() {
-  const [sessions, setSessions] = useState<IssuePermissionsReturnType[]>([]);
+  const [sessions, setSessions] = useState<GrantPermissionsReturnType[]>([]);
   const {data: walletClient} = useWalletClient();
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
@@ -55,11 +55,12 @@ export default function SessionBlock() {
   const handleIssuePermissions = async () => {
     try {
       setIsPending(true);
-      const result = await walletClient?.extend(walletActionsErc7715()).issuePermissions({
+      const result = await walletClient?.extend(walletActionsErc7715()).grantPermissions({
         permissions: [
           {
             type: "contract-call",
             data: {
+              // @ts-ignore : The spec is WIP so ignore the type error for now. Below struct is supported.
               permissions: [
                   {
                     // target address

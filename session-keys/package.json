@@ -9,11 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@zerodev/wallet": "^0.0.10",
+    "@zerodev/wallet": "^0.1.0",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "viem": "^2.13.1",
+    "viem": "^2.16.3",
     "wagmi": "^2.9.7"
   },
   "devDependencies": {
