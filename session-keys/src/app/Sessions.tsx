@@ -84,9 +84,18 @@ export default function SessionBlock() {
                         value: 3,
                       },
                     ],
-                  }
-              ]
-            }
+                  },
+              ],
+            },
+            policies: [
+              {
+                type: "rate-limit",
+                data: {
+                  count: 100,
+                  interval: 60 * 60 * 24
+                }
+              }
+            ],
           },
         ],
         expiry: Math.floor(Date.now().valueOf() / 1000) + 3600,
