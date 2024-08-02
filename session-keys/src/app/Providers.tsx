@@ -9,7 +9,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient()
 
   const config = createConfig({
+    // @ts-ignore
     chains: [sepolia],
+    // @ts-ignore
     connectors: [passkeyConnector(projectId, sepolia, "v3.1", "zerodev_quickstart")],
     transports: {
       [sepolia.id]: http(),

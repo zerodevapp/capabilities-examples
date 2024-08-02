@@ -71,9 +71,14 @@ export default function SessionBlock() {
     try {
       setIsPending(true);
       const result = await walletClient
+        // @ts-ignore
         ?.extend(walletActionsErc7715())
+        // @ts-ignore
         .grantPermissions({
           permissions: [],
+          signer: {
+            type: "wallet",
+          },
           // permissions: [
           //   {
           //     type: "contract-call",
