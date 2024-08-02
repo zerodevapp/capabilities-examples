@@ -10,7 +10,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   const config = createConfig({
     chains: [sepolia],
-    connectors: [passkeyConnector(projectId, sepolia, "v3", "zerodev_quickstart")],
+    connectors: [passkeyConnector(projectId, sepolia, "v3.1", "zerodev_quickstart")],
     transports: {
       [sepolia.id]: http(),
     },

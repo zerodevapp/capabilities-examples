@@ -9,8 +9,9 @@ export default function App() {
   const { connect, isPending } = useConnect();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { data, writeContracts, isPending: isUserOpPending } = useWriteContracts();
+  const { data, writeContracts, isPending: isUserOpPending, error } = useWriteContracts();
 
+  console.log({error})
   return (
     <div className="flex justify-center items-center h-screen">
       {!isConnected ? (
