@@ -6,22 +6,29 @@ import {
   type GrantPermissionsReturnType,
 } from "viem/experimental";
 import { useWriteContracts } from "wagmi/experimental";
-import { ParamCondition } from "@zerodev/permissions/policies";
 import { ENTRYPOINT_ADDRESS_V07 } from "permissionless";
 import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types";
-import { paymasterUrl, tokenAddress, abi } from "./constants";
+import {
+  paymasterUrl,
+  tokenAddress,
+  abi,
+  erc20SpenderAddress,
+} from "./constants";
 import {
   Hex,
   createPublicClient,
   decodeAbiParameters,
   encodeFunctionData,
+  erc20Abi,
+  getAbiItem,
   http,
   keccak256,
+  toFunctionSelector,
+  toHex,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   type Delegation,
-  ROOT_AUTHORITY,
   createSessionAccount,
   getDelegationTupleType,
 } from "@zerodev/session-account";
@@ -31,6 +38,7 @@ import {
   createZeroDevPaymasterClient,
 } from "@zerodev/sdk";
 import { sepolia } from "wagmi/chains";
+import { erc20SpenderAbi } from "./abis/erc20SpenderAbi";
 
 const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 const PAYMASTER_URL = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
@@ -53,7 +61,7 @@ function SessionInfo({
 
   const sendDappManagedTx = async () => {
     setDappManagedTxIsPending(true);
-    const sessionSigner = privateKeyToAccount(privateKey);
+    const sessionKeySigner = privateKeyToAccount(privateKey);
 
     const [delegations, delegatorInitCode] = decodeAbiParameters(
       [getDelegationTupleType(true), { type: "bytes" }],
@@ -64,7 +72,7 @@ function SessionInfo({
     });
     const sessionAccount = await createSessionAccount(publicClient, {
       entryPoint: ENTRYPOINT_ADDRESS_V07,
-      sessionKeyAccount: sessionSigner,
+      sessionKeySigner,
       delegations: delegations as Delegation[],
       delegatorInitCode,
     });
@@ -121,9 +129,15 @@ function SessionInfo({
                 contracts: [
                   {
                     address: tokenAddress,
-                    abi: abi,
-                    functionName: "mint",
-                    args: [address, 1],
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [erc20SpenderAddress, BigInt(10)],
+                  },
+                  {
+                    address: erc20SpenderAddress,
+                    abi: erc20SpenderAbi,
+                    functionName: "spendAllowance",
+                    args: [tokenAddress, BigInt(10)],
                   },
                 ],
                 capabilities: {
@@ -137,7 +151,7 @@ function SessionInfo({
               });
             }}
           >
-            {isPending ? "Minting..." : "Mint With Session"}
+            {isPending ? "Tranferring..." : "Transfer With Session"}
           </button>
         )}
         {sessionType === "ACCOUNT" && (
@@ -177,52 +191,62 @@ export default function SessionBlock() {
         ?.extend(walletActionsErc7715())
         // @ts-ignore
         .grantPermissions({
-          permissions: [],
           signer: {
             type: "wallet",
           },
-          // permissions: [
-          //   {
-          //     type: "contract-call",
-          //     data: {
-          //       // @ts-ignore : The spec is WIP so ignore the type error for now. Below struct is supported.
-          //       permissions: [
-          //           {
-          //             // target address
-          //             target: tokenAddress,
-          //             // Maximum value that can be transferred.  In this case we
-          //             // set it to zero so that no value transfer is possible.
-          //             valueLimit: BigInt(0),
-          //             // Contract abi
-          //             abi: abi,
-          //             // Function name
-          //             functionName: "mint",
-          //             // An array of conditions, each corresponding to an argument for
-          //             // the function.
-          //             args: [
-          //               {
-          //                 condition: ParamCondition.EQUAL,
-          //                 value: address,
-          //               },
-          //               {
-          //                 condition: ParamCondition.LESS_THAN,
-          //                 value: 3,
-          //               },
-          //             ],
-          //           },
-          //       ],
-          //     },
-          //     policies: [
-          //       {
-          //         type: "rate-limit",
-          //         data: {
-          //           count: 100,
-          //           interval: 60 * 60 * 24
-          //         }
-          //       }
-          //     ],
-          //   },
-          // ],
+          permissions: [
+            {
+              type: { custom: "erc20-token-approve" },
+              data: {
+                tokenAddress,
+                allowance: toHex(10),
+                contractAllowList: [
+                  {
+                    address: erc20SpenderAddress,
+                    functions: [
+                      toFunctionSelector(
+                        getAbiItem({
+                          abi: erc20SpenderAbi,
+                          name: "spendAllowance",
+                        })
+                      ),
+                    ],
+                  },
+                ],
+              },
+              policies: [],
+            },
+            // {
+            //   type: "contract-call",
+            //   data: {
+            //     // @ts-ignore : The spec is WIP so ignore the type error for now. Below struct is supported.
+            //     permissions: [
+            //       {
+            //         callType: CallType.BATCH_CALL,
+            //         // target address
+            //         target: tokenAddress,
+            //         // Contract abi
+            //         abi: abi,
+            //         // Function name
+            //         functionName: "mint",
+            //         // An array of conditions, each corresponding to an argument for
+            //         // the function.
+            //         args: [
+            //           {
+            //             condition: ParamCondition.EQUAL,
+            //             value: address,
+            //           },
+            //           {
+            //             condition: ParamCondition.LESS_THAN,
+            //             value: 3,
+            //           },
+            //         ]
+            //       },
+            //     ],
+            //   },
+            //   policies: [],
+            // },
+          ],
           expiry: Math.floor(Date.now().valueOf() / 1000) + 3600,
         });
       console.log(result);

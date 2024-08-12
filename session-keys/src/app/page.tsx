@@ -41,7 +41,7 @@ export default function App() {
                       address: tokenAddress,
                       abi: abi,
                       functionName: "mint",
-                      args: [address, 1],
+                      args: [address, 100],
                     }
                   ],
                   capabilities: {
