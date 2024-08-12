@@ -6,8 +6,10 @@ import {
   type GrantPermissionsReturnType,
 } from "viem/experimental";
 import { useWriteContracts } from "wagmi/experimental";
-import { ENTRYPOINT_ADDRESS_V07 } from "permissionless";
-import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types";
+import {
+  ENTRYPOINT_ADDRESS_V07,
+  createSmartAccountClient,
+} from "permissionless";
 import {
   paymasterUrl,
   tokenAddress,
@@ -32,11 +34,7 @@ import {
   createSessionAccount,
   getDelegationTupleType,
 } from "@zerodev/session-account";
-import {
-  KernelSmartAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-} from "@zerodev/sdk";
+import { createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { sepolia } from "wagmi/chains";
 import { erc20SpenderAbi } from "./abis/erc20SpenderAbi";
 
@@ -69,6 +67,7 @@ function SessionInfo({
     );
     const publicClient = createPublicClient({
       transport: http(BUNDLER_URL),
+      chain: sepolia,
     });
     const sessionAccount = await createSessionAccount(publicClient, {
       entryPoint: ENTRYPOINT_ADDRESS_V07,
@@ -83,19 +82,21 @@ function SessionInfo({
       entryPoint: ENTRYPOINT_ADDRESS_V07,
     });
 
-    const kernelClient = createKernelAccountClient({
-      account:
-        sessionAccount as unknown as KernelSmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>,
-      chain: sepolia,
+    const kernelClient = createSmartAccountClient({
       entryPoint: ENTRYPOINT_ADDRESS_V07,
+      chain: sepolia,
+      // @ts-ignore
+      account: sessionAccount,
       bundlerTransport: http(BUNDLER_URL, { timeout: 100000 }),
       middleware: {
         sponsorUserOperation: paymasterClient.sponsorUserOperation,
       },
     });
     const userOpHash = await kernelClient.sendUserOperation({
+      // @ts-ignore
+      account: kernelClient.account,
       userOperation: {
-        callData: await kernelClient.account.encodeCallData({
+        callData: await kernelClient.account!.encodeCallData({
           to: tokenAddress,
           data: encodeFunctionData({
             abi: abi,
